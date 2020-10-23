@@ -1,0 +1,56 @@
+1.	Write a query to list the course number, course name and total number of students enrolled for all classes offered by the Computer Science department and taught by full time faculty.
+
+Select Catalog.[C#], Catalog.CName, sum(Schedule.Stdnts) As [Students Enrolled]
+From (Catalog inner join Schedule on Catalog.[C#] = Schedule.CNum) inner join Instructor on Instructor.InID = Schedule.InID
+Where Catalog.Dept = 'Computer Science' and Instructor.FullTime = True
+Group By Catalog.[C#], Catalog.CName;
+
+
+2.	Write a query to calculate how many sections of courses are being offered for courses that have the word “Database” in their names and are closed.
+
+Select Count(*) As [Closed Courses]
+From Catalog inner join Schedule on Catalog.[C#] = Schedule.CNum
+Where Catalog.CName like '%Database%' and Schedule.Stdnts >= Schedule.Size;
+
+
+3.	Write a query to list the names and office numbers of full time faculty who teach courses in the Math department. You must use sub-queries with no joins or Cartesian products to do this.
+
+Select Instructor.InName, Instructor.[Room#]
+From Instructor
+Where Instructor.FullTime = True and InID in
+	  (Select InID
+     From Schedule
+     Where CNum As [C#] in
+		    (Select C#
+         From Catalog
+         Where Dept = ‘Math’));
+
+
+
+4.	Write a query to list the names of English courses not being offered this semester. Order the course alphabetically.
+
+Select CName
+From Catalog
+Where Dept = 'English' and [C#] not in
+      (Select CNum
+       From Schedule)
+Order By CName;
+
+
+5.	For part time faculty who are teaching multiple courses, write a query to list out the name of each person, their join date, along with the number of students they are teaching.
+
+Select Instructor.InName, Instructor.JoinDate, sum(Schedule.Stdnts) As [Total Students]
+From Instructor inner join Schedule on Instructor.InID = Schedule.InID
+Where Instructor.FullTime = False
+Group By Instructor.InName, Instructor.JoinDate
+Having Count(*) > 1;
+
+
+6.	Write a query to list out the course number, name, and number of sections being offered this semester for all courses the CIS department has in the Catalog. Sort the courses so that the course with the most sections appear before those with fewer sections. If two courses have the same number of sections, order them by the course number.
+
+Select Catalog.[C#], Catalog.CName, Count(*) As [Sections Offered]
+From Catalog inner join Schedule on Catalog.[C#] = Schedule.CNum
+Where Catalog.Dept = 'CIS'
+Group By Catalog.[C#], Catalog.CName
+Order By Count(*) Desc, Catalog.[C#];
+
